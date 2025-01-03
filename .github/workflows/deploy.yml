@@ -1,14 +1,25 @@
+name: Deploy to Kubernetes
+
+on:
+  push:
+    branches:
+      - main
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Check out the code
         uses: actions/checkout@v2
 
       - name: Set up kubeconfig
         run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+          mkdir -p /tmp/.kube  # Используем доступный путь /tmp/.kube
+          echo "${{ secrets.KUBECONFIG }}" > /tmp/.kube/config  # Записываем конфигурацию
+
+      - name: Check kubeconfig content
+        run: cat /tmp/.kube/config  # Проверяем, что содержимое записано правильно
 
       - name: Set up kubectl
         uses: actions/setup-kubectl@v2
@@ -17,4 +28,4 @@ jobs:
 
       - name: Deploy to Kubernetes
         run: |
-          kubectl apply -f nginx-deployment.yaml
+          kubectl --kubeconfig=/tmp/.kube/config apply -f nginx-deployment.yaml  # Указываем путь к kubeconfig
