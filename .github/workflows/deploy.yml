@@ -15,15 +15,18 @@ jobs:
 
       - name: Set up kubeconfig
         run: |
-          mkdir -p /tmp/.kube
-          echo "${{ secrets.KUBECONFIG }}" > /tmp/.kube/config
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+          echo "${{ secrets.KUBE_CA_CERT }}" > $HOME/.kube/ca.crt
+          echo "${{ secrets.KUBE_CLIENT_CERT }}" > $HOME/.kube/client.crt
+          echo "${{ secrets.KUBE_CLIENT_KEY }}" > $HOME/.kube/client.key
 
       - name: Check kubeconfig content
-        run: cat /tmp/.kube/config
+        run: cat $HOME/.kube/config
 
       - name: Set up kubectl
-        uses: azure/setup-kubectl@v1  # Используем актуальный action от Azure
+        uses: azure/setup-kubectl@v1
 
       - name: Deploy to Kubernetes
         run: |
-          kubectl --kubeconfig=/tmp/.kube/config apply -f nginx-deployment.yaml
+          kubectl --kubeconfig=$HOME/.kube/config apply -f nginx-deployment.yaml
