@@ -15,17 +15,15 @@ jobs:
 
       - name: Set up kubeconfig
         run: |
-          mkdir -p /tmp/.kube  # Используем доступный путь /tmp/.kube
-          echo "${{ secrets.KUBECONFIG }}" > /tmp/.kube/config  # Записываем конфигурацию
+          mkdir -p /tmp/.kube
+          echo "${{ secrets.KUBECONFIG }}" > /tmp/.kube/config
 
       - name: Check kubeconfig content
-        run: cat /tmp/.kube/config  # Проверяем, что содержимое записано правильно
+        run: cat /tmp/.kube/config
 
       - name: Set up kubectl
-        uses: actions/setup-kubectl@v2
-        with:
-          version: 'v1.21.0'
+        uses: azure/setup-kubectl@v1  # Используем актуальный action от Azure
 
       - name: Deploy to Kubernetes
         run: |
-          kubectl --kubeconfig=/tmp/.kube/config apply -f nginx-deployment.yaml  # Указываем путь к kubeconfig
+          kubectl --kubeconfig=/tmp/.kube/config apply -f nginx-deployment.yaml
