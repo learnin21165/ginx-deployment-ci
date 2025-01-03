@@ -17,16 +17,20 @@ jobs:
         run: |
           mkdir -p $HOME/.kube
           echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
-          echo "${{ secrets.KUBE_CA_CERT }}" > $HOME/.kube/ca.crt
-          echo "${{ secrets.KUBE_CLIENT_CERT }}" > $HOME/.kube/client.crt
-          echo "${{ secrets.KUBE_CLIENT_KEY }}" > $HOME/.kube/client.key
+          echo "${{ secrets.CLIENT_CERT }}" > /tmp/client.crt
+          echo "${{ secrets.CLIENT_KEY }}" > /tmp/client.key
+          echo "${{ secrets.CA_CERT }}" > /tmp/ca.crt
 
-      - name: Check kubeconfig content
-        run: cat $HOME/.kube/config
-
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v1
+      - name: Configure kubectl
+        run: |
+          kubectl config set-credentials minikube \
+            --client-certificate=/tmp/client.crt \
+            --client-key=/tmp/client.key
+          kubectl config set-cluster minikube \
+            --certificate-authority=/tmp/ca.crt \
+            --server=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')
+          kubectl config set-context minikube --cluster=minikube --user=minikube
+          kubectl config use-context minikube
 
       - name: Deploy to Kubernetes
-        run: |
-          kubectl --kubeconfig=$HOME/.kube/config apply -f nginx-deployment.yaml
+        run: kubectl apply -f nginx-deployment.yaml
