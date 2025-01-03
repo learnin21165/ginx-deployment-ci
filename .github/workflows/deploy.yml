@@ -10,19 +10,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out the code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Set up kubeconfig
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
-          echo "${{ secrets.CLIENT_CERT }}" > $HOME/.kube/client.crt
-          echo "${{ secrets.CLIENT_KEY }}" > $HOME/.kube/client.key
-          echo "${{ secrets.CA_CRT }}" > $HOME/.kube/ca.crt
+    - name: Set up kubeconfig
+      run: |
+        mkdir -p $HOME/.kube
+        echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+        echo "${{ secrets.CLIENT_CERT }}" > $HOME/.kube/client.crt
+        echo "${{ secrets.CLIENT_KEY }}" > $HOME/.kube/client.key
+        echo "${{ secrets.CA_CRT }}" > $HOME/.kube/ca.crt
 
-      - name: Apply Nginx Deployment
-        run: kubectl --kubeconfig=$HOME/.kube/config apply -f nginx-deployment.yaml
-
-      - name: Apply Nginx Service
-        run: kubectl --kubeconfig=$HOME/.kube/config apply -f nginx-service.yaml
+    - name: Deploy to Kubernetes
+      run: kubectl apply -f nginx-deployment.yaml --kubeconfig=$HOME/.kube/config
